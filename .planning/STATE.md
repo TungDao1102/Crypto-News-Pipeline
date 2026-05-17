@@ -5,9 +5,9 @@
 | Field | Value |
 |-------|-------|
 | **Project** | Crypto News & Airdrop Automation Pipeline |
-| **Last Session** | Phase 2 shipped — PR #1 |
+| **Last Session** | Phase 3 context gathered |
 | **Current Phase** | 3 |
-| **Resume File** | `.planning/phases/02-ai-handler/02-01-PLAN.md` |
+| **Resume File** | `.planning/phases/03-bot-reviewer/03-CONTEXT.md` |
 | **Last Updated** | 2026-05-17 |
 
 ## Phase Progress
@@ -16,7 +16,7 @@
 |-------|------|--------|
 | 1 | Configuration & Crawler | Executed (UAT partial) |
 | 2 | AI Handler & Processing | Shipped — PR #1 |
-| 3 | Bot Reviewer & Mode Management | Pending |
+| 3 | Bot Reviewer & Mode Management | Context gathered — ready to plan |
 | 4 | Publisher & Platform Integration | Pending |
 | 5 | Resilience, Logging & Monitoring | Pending |
 
@@ -30,4 +30,4 @@ See: `AI-SPEC.md` (updated 2026-05-17 after system architecture design)
 
 ---
 
-*Last updated: 2026-05-17 after Phase 2 shipped*
+*Last updated: 2026-05-17 after Phase 3 context discussion*
