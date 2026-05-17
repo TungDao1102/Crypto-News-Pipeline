@@ -23,7 +23,8 @@
   - Plan 05: AUTO Mode & Guardrails (Wave 2)
 
 ## Phase 4: Publisher & Platform Integration ⏳
-- Status: Pending
+- Status: Context gathered — ready to plan
+- Decisions: 6 areas discussed, 6 decisions captured in `04-CONTEXT.md`
 
 ## Phase 5: Resilience, Logging & Monitoring ⏳
 - Status: Pending
