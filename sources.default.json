@@ -1,0 +1,7 @@
+[
+  { "channel": "@AirdropRWA", "tags": ["airdrop"], "enabled": true },
+  { "channel": "@testnetmac", "tags": ["testnet"], "enabled": true },
+  { "channel": "@DefiLama", "tags": ["defi", "macro"], "enabled": true },
+  { "channel": "@CryptoAirdropNews", "tags": ["airdrop"], "enabled": true },
+  { "channel": "@airdrops_official", "tags": ["airdrop"], "enabled": false }
+]

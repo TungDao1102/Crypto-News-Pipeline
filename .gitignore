@@ -192,4 +192,9 @@ pyrightconfig.json
 .history
 .ionide
 
+# Project-specific
+telegram.session
+sources.json
+logs/
+
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode

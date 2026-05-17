@@ -1,0 +1,35 @@
+﻿{
+    "commit_docs":  true,
+    "workflow":  {
+                     "verifier":  true,
+                     "auto_advance":  false,
+                     "tdd_mode":  false,
+                     "code_review":  true,
+                     "ai_integration_phase":  true,
+                     "skip_discuss":  false,
+                     "plan_check":  true,
+                     "code_review_depth":  "standard",
+                     "ui_phase":  true,
+                     "ui_safety_gate":  true,
+                     "research_before_questions":  false,
+                     "ui_review":  true,
+                     "nyquist_validation":  true,
+                     "pattern_mapper":  true,
+                     "use_worktrees":  true,
+                     "research":  false
+                 },
+    "intel":  {
+                  "enabled":  false
+              },
+    "hooks":  {
+                  "context_warnings":  true
+              },
+    "graphify":  {
+                     "enabled":  false
+                 },
+    "git":  {
+                "branching_strategy":  "none",
+                "create_tag":  true
+            },
+    "model_profile":  "balanced"
+}
