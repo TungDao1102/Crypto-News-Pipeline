@@ -61,6 +61,9 @@ async def main() -> None:
                 admin_chat_id=config.admin_chat_id,
                 result_queue=result_queue,
                 publish_queue=publish_queue,
+                http_client=http_client,
+                binance_api_key=config.binance_square_api_key,
+                telegram_channel_id=config.telegram_channel_id,
             )
         )
 
