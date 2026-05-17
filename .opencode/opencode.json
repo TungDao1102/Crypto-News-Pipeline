@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "C:/Users/daotu/Documents/Crypto-News-Pipeline/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "C:/Users/daotu/Documents/Crypto-News-Pipeline/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
