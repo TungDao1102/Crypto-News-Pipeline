@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+import httpx
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
@@ -13,6 +14,7 @@ from telegram.ext import (
 )
 
 from src.models import DraftContent
+from src.publisher.consumer import PublisherConsumer
 from src.scam_patterns import is_low_confidence, is_suspicious
 from src.system_state import SystemState
 
@@ -289,6 +291,9 @@ async def run_bot(
     admin_chat_id: str,
     result_queue: asyncio.Queue[DraftContent],
     publish_queue: asyncio.Queue[DraftContent],
+    http_client: httpx.AsyncClient,
+    binance_api_key: str,
+    telegram_channel_id: str,
 ) -> None:
     application = (
         Application.builder()
@@ -309,11 +314,23 @@ async def run_bot(
 
     asyncio.create_task(review_consumer(result_queue, application, admin_chat_id))
 
+    publisher_consumer = PublisherConsumer(
+        publish_queue=publish_queue,
+        system_state=system_state,
+        http_client=http_client,
+        binance_api_key=binance_api_key,
+        bot=application.bot,
+        telegram_channel_id=telegram_channel_id,
+    )
+    publisher_task = asyncio.create_task(publisher_consumer.start())
+
     try:
         await asyncio.Event().wait()
     except asyncio.CancelledError:
         logger.info("Bot polling cancelled — shutting down")
     finally:
+        publisher_task.cancel()
+        await publisher_consumer.shutdown()
         await application.updater.stop()
         await application.stop()
         await application.shutdown()

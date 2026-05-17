@@ -28,5 +28,13 @@ class DraftContent(BaseModel):
     used_fallback: bool = False
 
 
+class PublishResult(BaseModel):
+    platform: Literal["telegram", "binance_square"]
+    success: bool
+    url: str | None = None
+    error: str | None = None
+    post_id: str | None = None
+
+
 class ConfigError(Exception):
     pass
