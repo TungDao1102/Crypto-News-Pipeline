@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -15,6 +17,14 @@ class RawMessage(BaseModel):
     media_info: str | None = None
     timestamp: datetime
     content_hash: str
+
+
+class DraftContent(BaseModel):
+    title_vn: str
+    telegram_markdown: str
+    binance_square_markdown: str
+    status: Literal["pending", "approved", "rejected", "published"] = "pending"
+    tags: list[str] = []
 
 
 class ConfigError(Exception):
