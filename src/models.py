@@ -25,6 +25,7 @@ class DraftContent(BaseModel):
     binance_square_markdown: str
     status: Literal["pending", "approved", "rejected", "published"] = "pending"
     tags: list[str] = []
+    used_fallback: bool = False
 
 
 class ConfigError(Exception):

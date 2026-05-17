@@ -12,8 +12,15 @@
   - `02-03-PLAN.md` — OpenRouter API caller + 2-stage processing + prompt registry (Wave 2)
   - `02-04-PLAN.md` — Wire AI handler into main.py (Wave 2)
 
-## Phase 3: Bot Reviewer & Mode Management ⏳
-- Status: Pending
+## Phase 3: Bot Reviewer & Mode Management ✅
+- Status: Shipped — PR #2
+- Plans:
+  - `03-PLAN.md` — 5 plans in 2 waves
+  - Plan 01: Bot Setup & SystemState (Wave 1)
+  - Plan 02: Command Handlers (Wave 2)
+  - Plan 03: Approval Flow (Wave 2)
+  - Plan 04: Edit Flow (Wave 2)
+  - Plan 05: AUTO Mode & Guardrails (Wave 2)
 
 ## Phase 4: Publisher & Platform Integration ⏳
 - Status: Pending

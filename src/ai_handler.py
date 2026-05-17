@@ -252,13 +252,13 @@ class OpenRouterClient:
         user_content: str,
         response_model: type[BaseModel],
         temperature: float = 0.6,
-    ) -> BaseModel | None:
+    ) -> tuple[BaseModel | None, bool]:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
         ]
         last_exception: Exception | None = None
-        for model in FALLBACK_MODELS:
+        for idx, model in enumerate(FALLBACK_MODELS):
             try:
                 logger.info("Calling OpenRouter (structured) model: %s", model)
                 headers = {
@@ -282,7 +282,7 @@ class OpenRouterClient:
                 content = data["choices"][0]["message"]["content"]
                 parsed = response_model.model_validate_json(content)
                 logger.info("OpenRouter model %s structured result validated", model)
-                return parsed
+                return parsed, idx > 0
             except httpx.TimeoutException:
                 logger.warning("Timeout on model %s, trying next", model)
                 last_exception = httpx.TimeoutException("Timeout")
@@ -422,7 +422,7 @@ class AIConsumer:
 
         try:
             await self.rate_limiter.acquire()
-            translate_result = await self._openrouter.call_structured(
+            translate_result, used_fallback = await self._openrouter.call_structured(
                 system_prompt=prompts["translate_system"],
                 user_content=prompts["user_template"].format(raw_text=preprocessed),
                 response_model=TranslatedText,
@@ -442,7 +442,7 @@ class AIConsumer:
                 f"{translate_result.translated_text}\n\n"
                 f"Output ONLY valid JSON with fields: title_vn, telegram_markdown, binance_square_markdown"
             )
-            rewrite_result = await self._openrouter.call_structured(
+            rewrite_result, rewrite_used_fallback = await self._openrouter.call_structured(
                 system_prompt=prompts["rewrite_system"],
                 user_content=rewrite_prompt,
                 response_model=DraftContent,
@@ -456,6 +456,7 @@ class AIConsumer:
                     binance_square_markdown=translate_result.translated_text,
                     status="pending",
                     tags=tags,
+                    used_fallback=used_fallback,
                 )
         except AllModelsExhausted:
             logger.warning(
@@ -469,9 +470,11 @@ class AIConsumer:
                 binance_square_markdown=translate_result.translated_text,
                 status="pending",
                 tags=tags,
+                used_fallback=True,
             )
 
         rewrite_result.tags = tags
         rewrite_result.status = "pending"
+        rewrite_result.used_fallback = used_fallback or rewrite_used_fallback
         logger.info("Message %d from %s: successfully processed", msg.message_id, msg.source_channel)
         return rewrite_result

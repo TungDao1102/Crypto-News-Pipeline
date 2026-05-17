@@ -6,10 +6,12 @@ import sys
 import httpx
 
 from src.ai_handler import AIConsumer, TokenBucket
+from src.bot_reviewer import run_bot
 from src.config import ConfigError, load_config
 from src.crawler import TelegramCrawler
 from src.logging_setup import setup_logging
 from src.models import DraftContent, RawMessage
+from src.system_state import SystemState
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,9 @@ async def main() -> None:
 
     raw_queue: asyncio.Queue[RawMessage] = asyncio.Queue()
     result_queue: asyncio.Queue[DraftContent] = asyncio.Queue()
+    publish_queue: asyncio.Queue[DraftContent] = asyncio.Queue()
+
+    system_state = SystemState()
 
     channel_tags = {
         s.channel: s.tags
@@ -49,12 +54,23 @@ async def main() -> None:
             api_key=config.openrouter_api_key,
         )
 
+        bot_task = asyncio.create_task(
+            run_bot(
+                token=config.bot_token,
+                system_state=system_state,
+                admin_chat_id=config.admin_chat_id,
+                result_queue=result_queue,
+                publish_queue=publish_queue,
+            )
+        )
+
         loop = asyncio.get_running_loop()
 
         async def shutdown() -> None:
             logger.info("Shutting down...")
             await crawler.shutdown()
             await ai_consumer.shutdown()
+            bot_task.cancel()
             pending = asyncio.all_tasks(loop)
             for task in pending:
                 task.cancel()
@@ -72,6 +88,7 @@ async def main() -> None:
             await asyncio.gather(
                 crawler.start(),
                 ai_consumer.start(),
+                bot_task,
             )
         except asyncio.CancelledError:
             pass
