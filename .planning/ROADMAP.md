@@ -22,9 +22,16 @@
   - Plan 04: Edit Flow (Wave 2)
   - Plan 05: AUTO Mode & Guardrails (Wave 2)
 
-## Phase 4: Publisher & Platform Integration ⏳
-- Status: Context gathered — ready to plan
+## Phase 4: Publisher & Platform Integration ✅
+- Status: Shipped — PR #3
 - Decisions: 6 areas discussed, 6 decisions captured in `04-CONTEXT.md`
 
-## Phase 5: Resilience, Logging & Monitoring ⏳
-- Status: Pending
+## Phase 5: Resilience, Logging & Monitoring 📋
+- Status: Planned (6 plans, 18 decisions covered)
+- Plans:
+  - `05-01-PLAN.md` — HealthCollector + alert cooldown (Wave 1)
+  - `05-02-PLAN.md` — BoundedQueue + DeadLetterQueue (Wave 1)
+  - `05-03-PLAN.md` — DailyMetrics collector (Wave 1)
+  - `05-04-PLAN.md` — Logging config + error codes (Wave 1)
+  - `05-05-PLAN.md` — AIConsumer cooldown mechanism (Wave 1)
+  - `05-06-PLAN.md` — Module wiring: health callbacks, /health command, alerts, error codes, metrics wiring (Wave 2)
