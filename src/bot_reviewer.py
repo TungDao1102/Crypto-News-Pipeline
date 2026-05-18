@@ -13,8 +13,12 @@ from telegram.ext import (
     filters,
 )
 
+from src.health import HealthCollector
+from src.logging_setup import ErrorCode, ec
+from src.metrics import DailyMetrics
 from src.models import DraftContent
 from src.publisher.consumer import PublisherConsumer
+from src.queue_utils import BoundedQueue, DeadLetterQueue
 from src.scam_patterns import is_low_confidence, is_suspicious
 from src.system_state import SystemState
 
@@ -57,6 +61,38 @@ async def post_init(application: Application) -> None:
     )
     if system_state and result_queue:
         await startup_notification(application, system_state, result_queue)
+
+
+async def health(update: Update, context: CallbackContext) -> None:
+    health_collector: HealthCollector = context.application.bot_data.get("health_collector")
+    if not health_collector:
+        await update.message.reply_text("Health collector not available")
+        return
+    report = await health_collector.get_report()
+    lines = [f"\U0001fa9a **System Health** [{report['status'].upper()}]"]
+    lines.append(f"Checked: {report['timestamp']}")
+    lines.append("")
+    for module, status in report["checks"].items():
+        emoji = "\u2705" if status.get("status") == "ok" else ("\u23f1\ufe0f" if status.get("status") == "timeout" else "\u274c")
+        lines.append(f"{emoji} **{module}**: {status.get('status', 'unknown')}")
+        if "data" in status and isinstance(status["data"], dict):
+            for key, value in status["data"].items():
+                if value is not None:
+                    lines.append(f"  \u2022 {key}: {value}")
+        if "error" in status:
+            lines.append(f"  \u2022 error: {status['error']}")
+    lines.append("")
+    lines.append("\U0001f4ca **Queue Depths**")
+    for qname, q in [("raw", context.application.bot_data.get("raw_queue")),
+                      ("result", context.application.bot_data.get("result_queue")),
+                      ("publish", context.application.bot_data.get("publish_queue"))]:
+        if q:
+            lines.append(f"  \u2022 {qname}: {q.qsize()}")
+    dlq: DeadLetterQueue = context.application.bot_data.get("dlq")
+    if dlq:
+        dlq_info = dlq.snapshot()
+        lines.append(f"  \u2022 dlq: {dlq_info['depth']} pending ({dlq_info['total_accumulated']} total)")
+    await update.message.reply_text("\n".join(lines))
 
 
 async def mode_auto(update: Update, context: CallbackContext) -> None:
@@ -127,6 +163,9 @@ async def handle_approve(update: Update, context: CallbackContext) -> None:
     await system_state.increment_processed()
     await query.edit_message_text(f"✅ **Approved** — {draft.title_vn}")
     logger.info("Draft %d approved by admin — %s", draft_index, draft.title_vn)
+    daily_metrics: DailyMetrics = context.application.bot_data.get("daily_metrics")
+    if daily_metrics:
+        daily_metrics.increment("drafts_approved")
 
 
 async def handle_reject(update: Update, context: CallbackContext) -> None:
@@ -140,6 +179,9 @@ async def handle_reject(update: Update, context: CallbackContext) -> None:
     draft.status = "rejected"
     await query.edit_message_text(f"❌ **Rejected** — {draft.title_vn}")
     logger.info("Draft %d rejected by admin — %s", draft_index, draft.title_vn)
+    daily_metrics: DailyMetrics = context.application.bot_data.get("daily_metrics")
+    if daily_metrics:
+        daily_metrics.increment("drafts_rejected")
 
 
 async def review_consumer(
@@ -187,12 +229,25 @@ async def review_consumer(
                 reply_markup=keyboard,
             )
         except Exception:
-            logger.exception("Failed to send draft %d for review", idx)
+            logger.exception(ec(ErrorCode.PUBLISH_FAIL, "Failed to send draft %d for review"), idx)
 
         pending_count = len(_pending_drafts)
         if pending_count > 50:
+            current_mode = await system_state.get_mode()
+            if current_mode == "AUTO":
+                logger.warning(
+                    ec(ErrorCode.QUEUE_DEPTH_CRITICAL, "Queue depth %d > 50 \u2014 switching to MANUAL mode"),
+                    pending_count,
+                )
+                await system_state.set_mode("MANUAL")
+                hc: HealthCollector = application.bot_data.get("health_collector")
+                if hc:
+                    await hc.send_alert(
+                        "queue_overflow",
+                        f"Queue depth {pending_count} > 50 \u2014 auto-switched to MANUAL mode",
+                    )
             logger.warning(
-                "Review queue at %d pending — backpressure warning",
+                ec(ErrorCode.QUEUE_DEPTH_CRITICAL, "Review queue at %d pending \u2014 backpressure warning"),
                 pending_count,
             )
 
@@ -265,6 +320,7 @@ def register_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("mode_auto", mode_auto))
     application.add_handler(CommandHandler("mode_manual", mode_manual))
     application.add_handler(CommandHandler("status", status))
+    application.add_handler(CommandHandler("health", health))
 
     edit_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(handle_edit, pattern="^edit:")],
@@ -289,11 +345,15 @@ async def run_bot(
     token: str,
     system_state: SystemState,
     admin_chat_id: str,
-    result_queue: asyncio.Queue[DraftContent],
-    publish_queue: asyncio.Queue[DraftContent],
+    result_queue: BoundedQueue[DraftContent],
+    publish_queue: BoundedQueue[DraftContent],
     http_client: httpx.AsyncClient,
     binance_api_key: str,
     telegram_channel_id: str,
+    health_collector: HealthCollector,
+    dlq: DeadLetterQueue,
+    daily_metrics: DailyMetrics,
+    raw_queue: BoundedQueue,
 ) -> None:
     application = (
         Application.builder()
@@ -305,6 +365,12 @@ async def run_bot(
     application.bot_data["admin_chat_id"] = admin_chat_id
     application.bot_data["result_queue"] = result_queue
     application.bot_data["publish_queue"] = publish_queue
+    application.bot_data["health_collector"] = health_collector
+    application.bot_data["dlq"] = dlq
+    application.bot_data["daily_metrics"] = daily_metrics
+    application.bot_data["raw_queue"] = raw_queue
+
+    health_collector.set_bot(application.bot, admin_chat_id)
 
     register_handlers(application)
 
@@ -321,6 +387,8 @@ async def run_bot(
         binance_api_key=binance_api_key,
         bot=application.bot,
         telegram_channel_id=telegram_channel_id,
+        dlq=dlq,
+        health_collector=health_collector,
     )
     publisher_task = asyncio.create_task(publisher_consumer.start())
 

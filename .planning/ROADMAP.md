@@ -26,8 +26,8 @@
 - Status: Shipped — PR #3
 - Decisions: 6 areas discussed, 6 decisions captured in `04-CONTEXT.md`
 
-## Phase 5: Resilience, Logging & Monitoring 📋
-- Status: Planned (6 plans, 18 decisions covered)
+## Phase 5: Resilience, Logging & Monitoring ✅
+- Status: Shipped — PR #5
 - Plans:
   - `05-01-PLAN.md` — HealthCollector + alert cooldown (Wave 1)
   - `05-02-PLAN.md` — BoundedQueue + DeadLetterQueue (Wave 1)
