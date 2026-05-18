@@ -3,6 +3,7 @@ import re
 
 import httpx
 
+from src.logging_setup import ErrorCode, ec
 from src.publisher.base import BasePublisher, PublisherResult
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ class BinanceSquarePublisher(BasePublisher):
     async def publish(self, content: str) -> PublisherResult:
         cleaned = strip_markdown(content)
         if not cleaned:
-            logger.warning("Binance Square: empty content after Markdown stripping")
+            logger.warning(ec(ErrorCode.BINANCE_DAILY_LIMIT, "Binance Square: empty content after Markdown stripping"))
             return PublisherResult(
                 platform="binance_square",
                 success=False,
@@ -89,28 +90,28 @@ class BinanceSquarePublisher(BasePublisher):
                     post_id=str(post_id),
                 )
             if code == "220009":
-                logger.warning("Binance Square: daily limit reached (code 220009)")
+                logger.warning(ec(ErrorCode.BINANCE_DAILY_LIMIT, "Binance Square: daily limit reached (code 220009)"))
                 return PublisherResult(
                     platform="binance_square",
                     success=False,
                     error="Daily limit reached (220009)",
                 )
             error_msg = data.get("message", f"Error code {code}")
-            logger.error("Binance Square publish failed: %s", error_msg)
+            logger.error(ec(ErrorCode.PUBLISH_FAIL, "Binance Square publish failed: %s"), error_msg)
             return PublisherResult(
                 platform="binance_square",
                 success=False,
                 error=error_msg,
             )
         except httpx.TimeoutException:
-            logger.error("Binance Square: timeout")
+            logger.error(ec(ErrorCode.PUBLISH_FAIL, "Binance Square: timeout"))
             return PublisherResult(
                 platform="binance_square",
                 success=False,
                 error="Timeout",
             )
         except httpx.HTTPStatusError as e:
-            logger.error("Binance Square: HTTP %s", e.response.status_code)
+            logger.error(ec(ErrorCode.PUBLISH_FAIL, "Binance Square: HTTP %s"), e.response.status_code)
             return PublisherResult(
                 platform="binance_square",
                 success=False,

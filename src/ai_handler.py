@@ -3,7 +3,10 @@ import json
 import logging
 import re
 import time
+from datetime import datetime
 from typing import Any
+
+from src.logging_setup import ErrorCode, ec
 
 import httpx
 from pydantic import BaseModel
@@ -370,8 +373,32 @@ class AIConsumer:
         self.worker_count = worker_count
         self._workers: list[asyncio.Task[None]] = []
         self._shutdown = asyncio.Event()
+        self._pause = asyncio.Event()
+        self._pause.clear()
+        self._pause_cooldown_task: asyncio.Task | None = None
+        self._pause_until: float | None = None
+        self._last_processed_time: str | None = None
         self._preprocessor = TextPreprocessor()
         self._openrouter = OpenRouterClient(api_key, http_client)
+
+    async def pause_ai(self, duration: int = 300) -> None:
+        """Pause all AI workers for `duration` seconds."""
+        self._pause.set()
+        self._pause_until = time.monotonic() + duration
+        logger.critical(
+            "[ERR_ALL_MODELS_EXHAUSTED] All models exhausted — pausing AI for %d seconds",
+            duration,
+        )
+        if self._pause_cooldown_task and not self._pause_cooldown_task.done():
+            self._pause_cooldown_task.cancel()
+        self._pause_cooldown_task = asyncio.create_task(self._auto_resume(duration))
+
+    async def _auto_resume(self, duration: int) -> None:
+        """Wait for cooldown, then clear the pause Event."""
+        await asyncio.sleep(duration)
+        self._pause.clear()
+        self._pause_until = None
+        logger.info("AI cooldown expired — resuming processing")
 
     async def start(self) -> None:
         self._workers = [
@@ -390,6 +417,9 @@ class AIConsumer:
 
     async def _worker(self, worker_id: int) -> None:
         while not self._shutdown.is_set():
+            if self._pause.is_set():
+                await asyncio.sleep(1)
+                continue
             qsize = self.raw_queue.qsize()
             if qsize > 10:
                 logger.warning(
@@ -401,6 +431,7 @@ class AIConsumer:
                 await self.rate_limiter.acquire()
                 draft = await self._process_message(msg)
                 if draft:
+                    self._last_processed_time = datetime.utcnow().isoformat() + "Z"
                     await self.result_queue.put(draft)
             except Exception:
                 logger.exception(
@@ -432,7 +463,8 @@ class AIConsumer:
                 logger.error("Message %d: all models exhausted for translation, skipping", msg.message_id)
                 return None
         except AllModelsExhausted:
-            logger.error("Message %d from %s: all models exhausted for translation", msg.message_id, msg.source_channel)
+            logger.error(ec(ErrorCode.ALL_MODELS_EXHAUSTED, "Message %d from %s: all models exhausted for translation", msg.message_id, msg.source_channel))
+            await self.pause_ai()
             return None
 
         try:
@@ -459,11 +491,8 @@ class AIConsumer:
                     used_fallback=used_fallback,
                 )
         except AllModelsExhausted:
-            logger.warning(
-                "Message %d from %s: all models exhausted for rewrite, using translated text",
-                msg.message_id,
-                msg.source_channel,
-            )
+            logger.warning(ec(ErrorCode.ALL_MODELS_EXHAUSTED, "Message %d from %s: all models exhausted for rewrite, using translated text", msg.message_id, msg.source_channel))
+            await self.pause_ai()
             return DraftContent(
                 title_vn=translate_result.translated_text[:100],
                 telegram_markdown=translate_result.translated_text,

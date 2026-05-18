@@ -4,6 +4,7 @@ import logging
 from telegram import Bot
 from telegram.error import BadRequest, Forbidden, NetworkError, RetryAfter, TimedOut
 
+from src.logging_setup import ErrorCode, ec
 from src.publisher.base import BasePublisher, PublisherResult
 
 logger = logging.getLogger(__name__)
@@ -38,21 +39,21 @@ class TelegramPublisher(BasePublisher):
                 error=None,
             )
         except Forbidden:
-            logger.error("Telegram publish: bot was kicked or blocked from channel")
+            logger.error(ec(ErrorCode.BOT_PERMISSION, "Telegram publish: bot was kicked or blocked from channel"))
             return PublisherResult(
                 platform="telegram",
                 success=False,
                 error="Bot kicked or blocked from channel",
             )
         except RetryAfter as e:
-            logger.warning("Telegram publish: rate limited, retry after %ds", e.retry_after)
+            logger.warning(ec(ErrorCode.PUBLISH_FAIL, "Telegram publish: rate limited, retry after %ds"), e.retry_after)
             return PublisherResult(
                 platform="telegram",
                 success=False,
                 error=f"Rate limited: retry after {e.retry_after}s",
             )
         except (BadRequest, NetworkError, TimedOut) as e:
-            logger.error("Telegram publish failed: %s", e)
+            logger.error(ec(ErrorCode.PUBLISH_FAIL, "Telegram publish failed: %s"), e)
             return PublisherResult(
                 platform="telegram",
                 success=False,

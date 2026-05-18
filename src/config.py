@@ -36,6 +36,7 @@ class Config:
         telegram_channel_id: str,
         system_mode: str,
         sources: list[SourceConfig],
+        log_levels: dict[str, str] | None = None,
     ):
         self.api_id = api_id
         self.api_hash = api_hash
@@ -46,6 +47,7 @@ class Config:
         self.telegram_channel_id = telegram_channel_id
         self.system_mode = system_mode
         self.sources = sources
+        self.log_levels = log_levels
 
 
 def _warn_defaults(values: dict[str, str]) -> None:
@@ -113,6 +115,18 @@ def load_config() -> Config:
 
     sources = _load_sources()
 
+    log_levels_raw = os.getenv("LOG_LEVELS")
+    log_levels: dict[str, str] | None = None
+    if log_levels_raw:
+        try:
+            log_levels = json.loads(log_levels_raw)
+            if not isinstance(log_levels, dict):
+                logger.warning("LOG_LEVELS is not a JSON dict, ignoring")
+                log_levels = None
+        except json.JSONDecodeError:
+            logger.warning("LOG_LEVELS is not valid JSON, ignoring")
+            log_levels = None
+
     return Config(
         api_id=int(values["TELEGRAM_API_ID"]),
         api_hash=values["TELEGRAM_API_HASH"],
@@ -123,4 +137,5 @@ def load_config() -> Config:
         telegram_channel_id=values["TELEGRAM_CHANNEL_ID"],
         system_mode=values["SYSTEM_MODE"],
         sources=sources,
+        log_levels=log_levels,
     )

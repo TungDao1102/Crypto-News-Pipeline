@@ -8,6 +8,7 @@ from collections import deque
 from telethon import TelegramClient, events, errors
 
 from src.config import Config
+from src.logging_setup import ErrorCode, ec
 from src.models import RawMessage
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,8 @@ class TelegramCrawler:
         self._shutdown = asyncio.Event()
         self._msg_count_per_source: dict[str, int] = {}
         self._source_paused_until: dict[str, float] = {}
+        self._health_collector: "HealthCollector | None" = None
+        self._last_message_time: str | None = None
 
     async def start(self) -> None:
         await self.client.start()
@@ -66,7 +69,39 @@ class TelegramCrawler:
         )
 
         logger.info("Crawler started — listening on %d source(s)", len(entities))
-        await self.client.run_until_disconnected()
+        retries = 0
+        while not self._shutdown.is_set():
+            try:
+                await self.client.run_until_disconnected()
+            except Exception:
+                logger.exception(ec(ErrorCode.SOURCE_DISCONNECT, "Crawler disconnected unexpectedly"))
+
+            if self._shutdown.is_set():
+                break
+
+            retries += 1
+            if retries >= BACKOFF_MAX_RETRIES:
+                logger.critical(
+                    ec(ErrorCode.SOURCE_DISCONNECT,
+                      "Crawler disconnected after %d retries — sending alert"),
+                    retries,
+                )
+                if self._health_collector:
+                    await self._health_collector.send_alert(
+                        "source_disconnect",
+                        "Crawler disconnected after max retries — manual intervention required",
+                    )
+                break
+
+            delay = min(BACKOFF_INITIAL * (BACKOFF_MULTIPLIER ** (retries - 1)), BACKOFF_MAX)
+            import random
+            jitter = delay * BACKOFF_JITTER * random.random()
+            total_delay = delay + jitter
+            logger.warning(
+                "Crawler reconnecting (retry %d/%d) in %.1fs...",
+                retries, BACKOFF_MAX_RETRIES, total_delay,
+            )
+            await asyncio.sleep(total_delay)
 
     async def _on_message(self, event: events.NewMessage.Event) -> None:
         text = event.message.text or (
@@ -124,6 +159,8 @@ class TelegramCrawler:
             content_hash=content_hash,
         )
         await self.queue.put(msg)
+        from datetime import datetime
+        self._last_message_time = datetime.utcnow().isoformat() + "Z"
         logger.debug("Queued message from %s: %.60s...", channel, text)
 
     @staticmethod
@@ -137,6 +174,18 @@ class TelegramCrawler:
         intersection = tokens_a & tokens_b
         union = tokens_a | tokens_b
         return len(intersection) / len(union)
+
+    def register_health(self, health_collector) -> None:
+        from src.health import HealthCollector
+        self._health_collector = health_collector
+        health_collector.register("crawler", self._check_health, timeout=3.0)
+
+    async def _check_health(self) -> dict:
+        return {
+            "connected": self.client.is_connected() if hasattr(self.client, 'is_connected') else False,
+            "channels_monitored": len(self.sources),
+            "last_message_received": getattr(self, "_last_message_time", None),
+        }
 
     async def shutdown(self) -> None:
         self._shutdown.set()
