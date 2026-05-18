@@ -20,7 +20,7 @@ progress:
 |-------|-------|
 | **Project** | Crypto News & Airdrop Automation Pipeline |
 | **Last Session** | Phase 5 context gathered |
-| **Current Phase** | 5 |
+| **Current Phase** | 5 (Phase 4 shipped) |
 | **Resume File** | `.planning/phases/05-resilience-logging-monitoring/05-CONTEXT.md` |
 | **Last Updated** | 2026-05-17 |
 
@@ -31,7 +31,7 @@ progress:
 | 1 | Configuration & Crawler | Executed (UAT partial) |
 | 2 | AI Handler & Processing | Shipped — PR #1 |
 | 3 | Bot Reviewer & Mode Management | Shipped — PR #2 |
-| 4 | Publisher & Platform Integration | Context gathered — ready to plan |
+| 4 | Publisher & Platform Integration | Shipped — PR #3 |
 | 5 | Resilience, Logging & Monitoring | Context gathered — ready to plan |
 
 ## Project Reference

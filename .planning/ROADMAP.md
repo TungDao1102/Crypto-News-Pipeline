@@ -22,8 +22,8 @@
   - Plan 04: Edit Flow (Wave 2)
   - Plan 05: AUTO Mode & Guardrails (Wave 2)
 
-## Phase 4: Publisher & Platform Integration ⏳
-- Status: Context gathered — ready to plan
+## Phase 4: Publisher & Platform Integration ✅
+- Status: Shipped — PR #3
 - Decisions: 6 areas discussed, 6 decisions captured in `04-CONTEXT.md`
 
 ## Phase 5: Resilience, Logging & Monitoring 📋
