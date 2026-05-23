@@ -47,3 +47,13 @@ Plans:
 - [ ] `06-01-PLAN.md` — Container image definition (Dockerfile, entrypoint.sh, .dockerignore)
 - [ ] `06-02-PLAN.md` — CI/CD & service orchestration (docker-compose.yml, GitHub Actions workflow, .ruff.toml)
 - [ ] `06-03-PLAN.md` — Deployment bootstrap guide (DEPLOYMENT.md with VPS setup, secrets, and first-deploy instructions)
+
+### Phase 7: Local Windows Development Setup
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 6
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 7 to break down)
