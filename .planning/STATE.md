@@ -19,10 +19,10 @@ progress:
 | Field | Value |
 |-------|-------|
 | **Project** | Crypto News & Airdrop Automation Pipeline |
-| **Last Session** | Phase 4 shipped — PR #3 |
-| **Current Phase** | 5 (Phase 4 shipped) |
-| **Resume File** | `.planning/phases/05-resilience-logging-monitoring/05-CONTEXT.md` |
-| **Last Updated** | 2026-05-18 |
+| **Last Session** | Phase 6 context gathered |
+| **Current Phase** | 6 (Deployment CI/CD) |
+| **Resume File** | `.planning/phases/06-deployment-ci-cd/06-CONTEXT.md` |
+| **Last Updated** | 2026-05-23 |
 
 ## Phase Progress
 
@@ -40,11 +40,11 @@ See: `AI-SPEC.md` (updated 2026-05-17 after system architecture design)
 
 **Core value:** Hệ thống pipeline tự động theo dõi các kênh Telegram quốc tế về crypto airdrop/testnet/retroactive, xử lý qua AI và xuất bản nội dung tiếng Việt lên Telegram + Binance Square.
 
-**Current focus:** Phase 5 — Resilience, Logging & Monitoring
+**Current focus:** Phase 6 — Deployment & CI/CD
 
 ---
 
-*Last updated: 2026-05-17 after Phase 5 context discussion*
+*Last updated: 2026-05-23 after Phase 6 context discussion*
 
 ## Accumulated Context
 
