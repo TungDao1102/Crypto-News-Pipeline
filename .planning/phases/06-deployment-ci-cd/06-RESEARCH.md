@@ -583,24 +583,24 @@ exec python -m src.main
 | A4 | `ruff check src/` is the correct lint command without a config file | CI workflow | Medium — ruff's behavior with no config file is conservative (no rules enabled by default). The planner may need a `pyproject.toml` or `.ruff.toml` to enable rules. |
 | A5 | The existing `event_loop` fixture in `conftest.py` works in CI without warnings | CI workflow | Low — pytest-asyncio 1.3.0 supports the old fixture pattern. May produce deprecation warnings but won't fail. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **ruff configuration file**
+1. **ruff configuration file** — RESOLVED: `.ruff.toml` created in Plan 02 Task 1 with `select = ["E", "F", "I"]`, `target-version = "py314"`
    - What we know: D-09 specifies "ruff lint" as a CI stage. The project has no `.ruff.toml` or `pyproject.toml` with ruff settings.
    - What's unclear: What rules should ruff enforce? The default (`ruff check src/` with no config) enables no rules — it passes trivially.
    - Recommendation: Create a minimal `.ruff.toml` selecting a rule set (e.g., `select = ["E", "F", "I"]` for pycodestyle + pyflakes + import sorting). Or skip ruff config creation and note that the planner must either add one or accept that lint will pass vacuously.
 
-2. **VPS directory structure convention**
+2. **VPS directory structure convention** — RESOLVED: Documented in DEPLOYMENT.md (Plan 03 Task 1) with `/opt/crypto-news-pipeline` structure
    - What we know: The deploy script assumes `/opt/crypto-news-pipeline` as the project root on the VPS.
    - What's unclear: Should this be configurable via a GitHub variable? What about the `data/` subdirectory for volumes?
    - Recommendation: Document the assumed path structure (can be changed by editing the workflow's SSH script).
 
-3. **First-deploy bootstrapping**
+3. **First-deploy bootstrapping** — RESOLVED: Full bootstrap guide in DEPLOYMENT.md (Plan 03 Task 1) covering Docker install, volume paths, file placement
    - What we know: The automated deploy flow assumes Docker + Docker Compose are installed, `.env` and `sources.json` exist at the correct paths, and `telegram.session` is present.
    - What's unclear: How the initial setup (Docker install, directory creation, file placement) is documented/performed.
    - Recommendation: Create a one-time setup script or document manual steps in a deployment guide. The planner should include a task for this.
 
-4. **Test CI dependency versions**
+4. **Test CI dependency versions** — RESOLVED: Planner chose unpinned `pip install pytest pytest-asyncio ruff` (Plan 02 Task 3). Pinning deferred to future `requirements-dev.txt`
    - What we know: `pytest==9.0.3` and `pytest-asyncio==1.3.0` are currently installed locally.
    - What's unclear: Whether to pin CI test dependencies to specific versions or install latest.
    - Recommendation: Unpinned is fine for CI (the `pip install pytest pytest-asyncio ruff` approach). Pinning in a `requirements-dev.txt` would be more reproducible but adds maintenance. Planner's choice.
