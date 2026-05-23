@@ -1,0 +1,36 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Test
+tests/
+.pytest_cache/
+
+# Config (handled by volumes)
+.env
+.env.example
+sources.json
+sources.default.json
+
+# Data (handled by volumes)
+logs/
+telegram.session
+
+# Documentation
+*.md
+AI-SPEC.md
+
+# IDE
+.vscode/
+.idea/
+
+# Ruff cache
+.ruff_cache/
