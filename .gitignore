@@ -196,5 +196,6 @@ pyrightconfig.json
 telegram.session
 sources.json
 logs/
+.session/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode

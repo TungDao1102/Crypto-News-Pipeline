@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 06 complete
-last_updated: "2026-05-23T16:54:14.218Z"
+status: Phase 6 & 7 shipped — PR #7
+last_updated: "2026-05-24T00:00:00.000Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 1
-  total_plans: 17
-  completed_plans: 5
-  percent: 17
+  total_plans: 16
+  completed_plans: 6
+  percent: 29
 ---
 
 # Project State: Crypto News & Airdrop Automation Pipeline
@@ -19,10 +19,10 @@ progress:
 | Field | Value |
 |-------|-------|
 | **Project** | Crypto News & Airdrop Automation Pipeline |
-| **Last Session** | Phase 6 context gathered |
-| **Current Phase** | 6 (Deployment CI/CD) |
-| **Resume File** | `.planning/phases/06-deployment-ci-cd/06-CONTEXT.md` |
-| **Last Updated** | 2026-05-23 |
+| **Last Session** | Phase 7 shipped |
+| **Current Phase** | 7 (Local Windows Development) |
+| **Resume File** | `.planning/phases/07-local-windows-dev-setup/07-SUMMARY.md` |
+| **Last Updated** | 2026-05-24 |
 
 ## Phase Progress
 
@@ -33,6 +33,8 @@ progress:
 | 3 | Bot Reviewer & Mode Management | Shipped — PR #2 |
 | 4 | Publisher & Platform Integration | Shipped — PR #3 |
 | 5 | Resilience, Logging & Monitoring | Shipped — PR #5 |
+| 6 | Deployment & CI/CD | Shipped — PR #6 |
+| 7 | Local Windows Development | Shipped |
 
 ## Project Reference
 
@@ -40,14 +42,15 @@ See: `AI-SPEC.md` (updated 2026-05-17 after system architecture design)
 
 **Core value:** Hệ thống pipeline tự động theo dõi các kênh Telegram quốc tế về crypto airdrop/testnet/retroactive, xử lý qua AI và xuất bản nội dung tiếng Việt lên Telegram + Binance Square.
 
-**Current focus:** Phase 06 — deployment-ci-cd
+**Current focus:** Phase 07 — Local Windows Development (shipped)
 
 ---
 
-*Last updated: 2026-05-23 after Phase 6 context discussion*
+*Last updated: 2026-05-24 after Phase 7 shipped*
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 6 added: Deployment & CI/CD
+- Phase 7 added: i want to have a method to run my tool fast in my computer (windows) without docker or something else complex
