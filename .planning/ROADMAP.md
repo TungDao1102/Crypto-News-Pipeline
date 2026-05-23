@@ -50,10 +50,10 @@ Plans:
 
 ### Phase 7: Local Windows Development Setup
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Create a single PowerShell script (run.ps1) that enables running the crypto-news-pipeline natively on Windows without Docker. Automate Python environment setup, dependency installation, and pipeline execution.
+**Requirements**: None specified
 **Depends on:** Phase 6
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 7 to break down)
+- [ ] `07-PLAN.md` — Single run.ps1 script with Validate→Init→Run lifecycle, .gitignore update for .session/
