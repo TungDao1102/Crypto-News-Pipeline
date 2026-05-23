@@ -35,3 +35,15 @@
   - `05-04-PLAN.md` — Logging config + error codes (Wave 1)
   - `05-05-PLAN.md` — AIConsumer cooldown mechanism (Wave 1)
   - `05-06-PLAN.md` — Module wiring: health callbacks, /health command, alerts, error codes, metrics wiring (Wave 2)
+
+### Phase 6: Deployment & CI/CD ✅
+
+**Goal:** Containerize the pipeline, automate builds and deploys via CI/CD, and establish a production-ready deployment on a Linux VPS.
+**Requirements**: None specified
+**Depends on:** Phase 5
+**Plans:** 3 plans
+
+Plans:
+- [ ] `06-01-PLAN.md` — Container image definition (Dockerfile, entrypoint.sh, .dockerignore)
+- [ ] `06-02-PLAN.md` — CI/CD & service orchestration (docker-compose.yml, GitHub Actions workflow, .ruff.toml)
+- [ ] `06-03-PLAN.md` — Deployment bootstrap guide (DEPLOYMENT.md with VPS setup, secrets, and first-deploy instructions)

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase_5_shipped
-last_updated: "2026-05-18T00:00:00.000Z"
+status: Phase 06 complete
+last_updated: "2026-05-23T16:54:14.218Z"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 12
-  completed_plans: 12
-  percent: 100
+  total_phases: 6
+  completed_phases: 1
+  total_plans: 17
+  completed_plans: 5
+  percent: 17
 ---
 
 # Project State: Crypto News & Airdrop Automation Pipeline
@@ -19,10 +19,10 @@ progress:
 | Field | Value |
 |-------|-------|
 | **Project** | Crypto News & Airdrop Automation Pipeline |
-| **Last Session** | Phase 4 shipped — PR #3 |
-| **Current Phase** | 5 (Phase 4 shipped) |
-| **Resume File** | `.planning/phases/05-resilience-logging-monitoring/05-CONTEXT.md` |
-| **Last Updated** | 2026-05-18 |
+| **Last Session** | Phase 6 context gathered |
+| **Current Phase** | 6 (Deployment CI/CD) |
+| **Resume File** | `.planning/phases/06-deployment-ci-cd/06-CONTEXT.md` |
+| **Last Updated** | 2026-05-23 |
 
 ## Phase Progress
 
@@ -40,8 +40,14 @@ See: `AI-SPEC.md` (updated 2026-05-17 after system architecture design)
 
 **Core value:** Hệ thống pipeline tự động theo dõi các kênh Telegram quốc tế về crypto airdrop/testnet/retroactive, xử lý qua AI và xuất bản nội dung tiếng Việt lên Telegram + Binance Square.
 
-**Current focus:** Phase 5 — Resilience, Logging & Monitoring
+**Current focus:** Phase 06 — deployment-ci-cd
 
 ---
 
-*Last updated: 2026-05-17 after Phase 5 context discussion*
+*Last updated: 2026-05-23 after Phase 6 context discussion*
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 6 added: Deployment & CI/CD

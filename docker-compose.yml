@@ -1,0 +1,17 @@
+services:
+  pipeline:
+    image: "${DOCKERHUB_USERNAME:-crypto-news-pipeline}/crypto-news-pipeline:latest"
+    container_name: crypto-news-pipeline
+    restart: unless-stopped
+    env_file: ./data/.env
+    volumes:
+      - ./data/.env:/app/.env:ro
+      - ./data/sources.json:/app/sources.json:ro
+      - ./data/logs:/app/logs
+      - ./data/session:/app/session
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'python -m src.main' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
