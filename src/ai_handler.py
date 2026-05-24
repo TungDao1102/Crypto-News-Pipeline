@@ -463,7 +463,7 @@ class AIConsumer:
                 logger.error("Message %d: all models exhausted for translation, skipping", msg.message_id)
                 return None
         except AllModelsExhausted:
-            logger.error(ec(ErrorCode.ALL_MODELS_EXHAUSTED, "Message %d from %s: all models exhausted for translation", msg.message_id, msg.source_channel))
+            logger.error(ec(ErrorCode.ALL_MODELS_EXHAUSTED, f"Message {msg.message_id} from {msg.source_channel}: all models exhausted for translation"))
             await self.pause_ai()
             return None
 
@@ -491,7 +491,7 @@ class AIConsumer:
                     used_fallback=used_fallback,
                 )
         except AllModelsExhausted:
-            logger.warning(ec(ErrorCode.ALL_MODELS_EXHAUSTED, "Message %d from %s: all models exhausted for rewrite, using translated text", msg.message_id, msg.source_channel))
+            logger.warning(ec(ErrorCode.ALL_MODELS_EXHAUSTED, f"Message {msg.message_id} from {msg.source_channel}: all models exhausted for rewrite, using translated text"))
             await self.pause_ai()
             return DraftContent(
                 title_vn=translate_result.translated_text[:100],
