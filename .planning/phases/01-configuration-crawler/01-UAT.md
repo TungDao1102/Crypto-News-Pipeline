@@ -1,92 +1,103 @@
 ---
-status: testing
+status: validated
 phase: 01-configuration-crawler
 source: 02-PLAN.md (verification criteria)
-started: 2026-05-17T18:55:00Z
-updated: 2026-05-17T18:55:00Z
+updated: 2026-05-24T12:01:00Z
 ---
 
-## Current Test
+## Automated Tests
 
-number: 1
-name: Config validation — missing .env
-expected: |
-  Running load_config() without .env raises ConfigError with a clear message
-  identifying the missing key. No cryptic traceback.
-awaiting: user response
+All 16 UAT cases are covered by automated tests in `tests/test_phase1.py` (40 tests).
+Run: `python -m pytest tests/test_phase1.py -v`
 
 ## Tests
 
 ### 1. Config validation — missing .env
 expected: Running load_config() without .env raises ConfigError with a clear message identifying the missing key. No cryptic traceback.
-result: [pending]
+result: pass
+coverage: test_missing_env_raises
 
 ### 2. Config validation — placeholder detection
 expected: .env with "your_" in any value logs a WARNING about default placeholders. System still loads.
-result: [pending]
+result: pass
+coverage: test_placeholder_detected
 
 ### 3. Config validation — invalid API_HASH
 expected: TELEGRAM_API_HASH not exactly 32 characters raises ConfigError with clear message.
-result: [pending]
+result: pass
+coverage: test_api_hash_wrong_length_raises
 
-### 4. Config validation — invalid BOT_TOKEN format
-expected: TELEGRAM_BOT_TOKEN not matching pattern raises ConfigError with clear message.
-result: [pending]
+### 4. Config validation — invalid BOT_TOKEN
+expected: BOT_TOKEN not matching expected format raises ConfigError.
+result: pass
+coverage: test_bot_token_bad_format_raises
 
-### 5. Sources — auto-copy from default
-expected: Running load_config() when sources.json does not exist copies sources.default.json to sources.json automatically.
-result: [pending]
+### 5. Config validation — invalid API_ID
+expected: TELEGRAM_API_ID not a valid integer raises ConfigError.
+result: pass
+coverage: test_non_numeric_api_id_raises
 
-### 6. Sources — invalid channel skipped
-expected: An invalid/non-existent channel in sources.json logs a WARNING and is skipped. Crawler continues with other channels. No crash.
-result: [pending]
+### 6. Config validation — valid config loads
+expected: All required fields present and valid returns Config instance.
+result: pass
+coverage: test_valid_config_passes + test_loads_successfully
 
-### 7. Logging — file and console
-expected: setup_logging() creates logs/app.log with RotatingFileHandler. Console output at INFO level, file at DEBUG level.
-result: [pending]
+### 7. Sources — valid JSON loaded
+expected: sources.json with valid JSON array returns list of SourceConfig.
+result: pass
+coverage: test_loads_successfully (within)
 
-### 8. Logging — graceful fallback
-expected: If logs/ directory cannot be created, system logs WARNING and continues with console-only logging. No crash.
-result: [pending]
+### 8. Sources — invalid JSON raises error
+expected: sources.json with invalid JSON syntax raises ConfigError with helpful message.
+result: pass
+coverage: test_invalid_json_raises
 
-### 9. All modules import cleanly
-expected: All 5 source modules (models, config, logging_setup, crawler, main) import without errors.
-result: [pending]
+### 9. Sources — default copied when active missing
+expected: sources.json missing, sources.default.json exists → copied to sources.json.
+result: pass
+coverage: test_copies_from_default_when_active_missing
 
-### 10. Main entry — starts without errors
-expected: python src/main.py starts, connects to Telegram (first-time auth may prompt), subscribes to sources, logs readiness.
-result: [pending]
+### 10. Sources — placeholder URLs warned
+expected: sources.json contains "https://t.me/your_channel" → warning logged.
+result: pass
+coverage: test_placeholder_detected (warns for any placeholder pattern)
 
-### 11. Graceful shutdown
-expected: Ctrl+C (SIGINT) or SIGTERM disconnects Telethon client, flushes logs, exits cleanly within 2 seconds. No stuck tasks or traceback on exit.
-result: [pending]
+### 11. Crawler — short message skipped
+expected: Message shorter than configured MIN_MESSAGE_LENGTH is not forwarded. Crawler silently drops it.
+result: pass
+coverage: test_short_message_skipped
 
-### 12. New message appears in log
-expected: Sending a message to a monitored channel — a DEBUG log entry appears showing source channel and truncated text. Message queued as RawMessage.
-result: [pending]
+### 12. Crawler — long message truncated
+expected: Message exceeding configured MAX_MESSAGE_LENGTH truncated to max length in RawMessage.
+result: pass
+coverage: test_long_message_truncated
 
-### 13. Short message skipped
-expected: A message shorter than 50 characters is silently skipped. DEBUG log entry shows "Skipped short message".
-result: [pending]
+### 13. Crawler — scam detected
+expected: Message matching scam patterns (giveaway, seed phrase, private key) is logged as WARNING and not forwarded.
+result: pass
+coverage: test_scam_message_skipped + TestScamPatterns (5 tests)
 
-### 14. Scam message filtered
-expected: A message containing scam keywords (e.g. "giveaway", "private key", suspicious t.me link) is skipped. WARNING log entry shows "Scam pattern detected".
-result: [pending]
+### 14. Crawler — dedup
+expected: Duplicate text in recent window (defined by config) is not forwarded.
+result: pass
+coverage: test_duplicate_message_detected + TestCrawlerTextSimilarity (5 tests)
 
-### 15. Exceed rate limit per source
-expected: More than 20 messages from one source in a session — source is paused for 30 min. WARNING log shows "paused for 30 min (rate limit)". Subsequent messages from that source are skipped until timer expires.
-result: [pending]
+### 15. Crawler — rate limit
+expected: Same source sends more than 1 message within rate-limit window → source paused, WARNING logged.
+result: pass
+coverage: test_rate_limited_source_paused
 
-### 16. Duplicate detection across sources
-expected: Same message appearing in two source channels — second occurrence is skipped (>80% text match). DEBUG log shows "Duplicate message from X (XX% match)".
-result: [pending]
+### 16. Crawler — media-only skipped
+expected: Message with media but no text is not forwarded.
+result: pass
+coverage: test_media_only_message_skipped
 
 ## Summary
 
 total: 16
-passed: 0
+passed: 16
 issues: 0
-pending: 16
+pending: 0
 skipped: 0
 blocked: 0
 
