@@ -3,20 +3,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-from pydantic import BaseModel
 
 from src.ai_handler import (
-    AIConsumer,
-    AllModelsExhausted,
-    OpenRouterClient,
     PROMPT_REGISTRY,
+    AIConsumer,
+    AllModelsExhaustedError,
+    OpenRouterClient,
     TextPreprocessor,
     TokenBucket,
     TranslatedText,
     prompt_for_tags,
 )
 from src.models import DraftContent
-
 
 # ─── Model Tests ─────────────────────────────────────────────────
 
@@ -261,7 +259,7 @@ class TestOpenRouterClient:
         mock_client.post = AsyncMock(return_value=fail)
 
         orc = OpenRouterClient(api_key="sk-test", http_client=mock_client)
-        with pytest.raises(AllModelsExhausted):
+        with pytest.raises(AllModelsExhaustedError):
             await orc.call_with_fallback(
                 system_prompt="be helpful",
                 user_content="hello",
@@ -410,7 +408,7 @@ class TestAIConsumer:
             patch.object(consumer._openrouter, "call_structured", new=AsyncMock(
                 side_effect=[
                     (TranslatedText(translated_text="Ethereum nâng cấp"), False),
-                    AllModelsExhausted("all failed"),
+                    AllModelsExhaustedError("all failed"),
                 ]
             )),
         ):
@@ -426,7 +424,7 @@ class TestAIConsumer:
         with (
             patch.object(consumer._preprocessor, "preprocess", return_value="Crypto news"),
             patch.object(consumer._openrouter, "call_structured", new=AsyncMock(
-                side_effect=AllModelsExhausted("all failed"),
+                side_effect=AllModelsExhaustedError("all failed"),
             )),
         ):
             result = await consumer._process_message(msg)
@@ -483,7 +481,7 @@ class TestAIConsumer:
         assert result.tags == []
 
 
-# ─── Cooldown / AllModelsExhausted Integration ───────────────────
+# ─── Cooldown / AllModelsExhaustedError Integration ───────────────────
 
 @pytest.mark.asyncio
 async def test_pause_cooldown():

@@ -76,7 +76,7 @@ def _validate(values: dict[str, str]) -> None:
 
     bot_token = values["TELEGRAM_BOT_TOKEN"]
     if not BOT_TOKEN_PATTERN.fullmatch(bot_token):
-        raise ConfigError(f"TELEGRAM_BOT_TOKEN does not match expected format")
+        raise ConfigError("TELEGRAM_BOT_TOKEN does not match expected format")
 
 
 def _load_sources() -> list[SourceConfig]:

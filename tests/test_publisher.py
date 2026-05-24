@@ -1,18 +1,15 @@
-import asyncio
-import re
-from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from src.models import PublishResult
 from src.publisher.base import BasePublisher, PublisherResult
-from src.publisher.tag_injector import TagInjector
-from src.publisher.telegram import TelegramPublisher
 from src.publisher.binance_square import BinanceSquareClient, BinanceSquarePublisher, strip_markdown
 from src.publisher.consumer import PublisherConsumer
+from src.publisher.tag_injector import TagInjector
+from src.publisher.telegram import TelegramPublisher
 
 
 class TestPublisherResultDataclass:
@@ -63,7 +60,6 @@ class TestBasePublisher:
 class TestPublishResultPydanticModel:
 
     def test_construct_with_required(self):
-        from src.models import PublishResult
         result = PublishResult(platform="telegram", success=True)
         assert result.platform == "telegram"
         assert result.success is True
@@ -72,7 +68,6 @@ class TestPublishResultPydanticModel:
         assert result.post_id is None
 
     def test_construct_with_all_fields(self):
-        from src.models import PublishResult
         result = PublishResult(
             platform="binance_square",
             success=False,
@@ -87,12 +82,10 @@ class TestPublishResultPydanticModel:
         assert result.post_id == "123"
 
     def test_invalid_platform_raises(self):
-        from src.models import PublishResult
         with pytest.raises(ValidationError):
             PublishResult(platform="invalid", success=True)
 
     def test_invalid_success_type_raises(self):
-        from src.models import PublishResult
         with pytest.raises(ValidationError):
             PublishResult(platform="telegram", success=[1, 2])
 
@@ -373,7 +366,6 @@ class TestTelegramPublisher:
 
     @pytest.mark.asyncio
     async def test_publish_escapes_html(self):
-        from src.publisher.telegram import HTML_ESCAPE_TABLE
 
         bot = AsyncMock()
         bot.send_message = AsyncMock()

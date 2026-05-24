@@ -1,5 +1,7 @@
-from src.logging_setup import ErrorCode, ec, configure_module_levels
 import logging
+
+from src.logging_setup import ErrorCode, configure_module_levels, ec
+
 
 def test_error_code_enum_values():
     assert ErrorCode.QUEUE_OVERFLOW.value == "ERR_QUEUE_OVERFLOW"

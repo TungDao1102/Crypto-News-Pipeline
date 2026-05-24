@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -52,19 +50,19 @@ class TestRunPs1:
 
     def test_no_dir_precreation_logs(self):
         content = (REPO_ROOT / "run.ps1").read_text(encoding="utf-8")
-        code_lines = [l for l in content.split("\n") if not l.strip().startswith("#")]
-        assert not any("mkdir" in l and "logs" in l for l in code_lines)
-        assert not any("mkdir" in l and ".session" in l for l in code_lines)
+        code_lines = [line for line in content.split("\n") if not line.strip().startswith("#")]
+        assert not any("mkdir" in line and "logs" in line for line in code_lines)
+        assert not any("mkdir" in line and ".session" in line for line in code_lines)
 
     def test_no_dir_precreation_via_newitem(self):
         content = (REPO_ROOT / "run.ps1").read_text(encoding="utf-8")
-        code_lines = [l for l in content.split("\n") if not l.strip().startswith("#")]
-        assert not any("New-Item" in l and "logs" in l for l in code_lines)
-        assert not any("New-Item" in l and ".session" in l for l in code_lines)
+        code_lines = [line for line in content.split("\n") if not line.strip().startswith("#")]
+        assert not any("New-Item" in line and "logs" in line for line in code_lines)
+        assert not any("New-Item" in line and ".session" in line for line in code_lines)
 
     def test_no_duplicated_validation(self):
         content = (REPO_ROOT / "run.ps1").read_text(encoding="utf-8")
-        code_lines = [l for l in content.split("\n") if not l.strip().startswith("#")]
+        code_lines = [line for line in content.split("\n") if not line.strip().startswith("#")]
         code = "\n".join(code_lines)
         assert "grep" not in code
         assert "your_" not in code

@@ -5,9 +5,10 @@ import re
 import time
 from collections import deque
 
-from telethon import TelegramClient, events, errors
+from telethon import TelegramClient, errors, events
 
 from src.config import Config
+from src.health import HealthCollector
 from src.logging_setup import ErrorCode, ec
 from src.models import RawMessage
 
@@ -176,7 +177,6 @@ class TelegramCrawler:
         return len(intersection) / len(union)
 
     def register_health(self, health_collector) -> None:
-        from src.health import HealthCollector
         self._health_collector = health_collector
         health_collector.register("crawler", self._check_health, timeout=3.0)
 

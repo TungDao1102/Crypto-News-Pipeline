@@ -1,5 +1,5 @@
-import re
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,11 @@ class TagInjector:
 
     def strip_tags(self, content: str) -> str:
         lines = content.split("\n")
-        clean = [l for l in lines if not TAG_LINE_PATTERN.match(l.strip()) or not self._looks_like_tag_block(l.strip())]
+        clean = [
+            line for line in lines
+            if not TAG_LINE_PATTERN.match(line.strip())
+            or not self._looks_like_tag_block(line.strip())
+        ]
         return "\n".join(clean).strip()
 
     def _looks_like_tag_block(self, line: str) -> bool:

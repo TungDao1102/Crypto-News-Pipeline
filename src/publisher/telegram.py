@@ -1,4 +1,3 @@
-import html
 import logging
 
 from telegram import Bot

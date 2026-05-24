@@ -1,7 +1,7 @@
 import json
 import tempfile
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
 from src.metrics import DailyMetrics
 

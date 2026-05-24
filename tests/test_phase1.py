@@ -1,9 +1,5 @@
 import asyncio
-import json
 import logging
-import os
-import re
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -12,7 +8,6 @@ import pytest
 
 from src.config import BOT_TOKEN_PATTERN, _load_sources, _validate, _warn_defaults, load_config
 from src.models import ConfigError, RawMessage, SourceConfig
-
 
 # ─── Model Tests ─────────────────────────────────────────────────
 

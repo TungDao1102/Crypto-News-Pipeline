@@ -73,7 +73,8 @@ async def health(update: Update, context: CallbackContext) -> None:
     lines.append(f"Checked: {report['timestamp']}")
     lines.append("")
     for module, status in report["checks"].items():
-        emoji = "\u2705" if status.get("status") == "ok" else ("\u23f1\ufe0f" if status.get("status") == "timeout" else "\u274c")
+        s = status.get("status")
+        emoji = "\u2705" if s == "ok" else ("\u23f1\ufe0f" if s == "timeout" else "\u274c")
         lines.append(f"{emoji} **{module}**: {status.get('status', 'unknown')}")
         if "data" in status and isinstance(status["data"], dict):
             for key, value in status["data"].items():

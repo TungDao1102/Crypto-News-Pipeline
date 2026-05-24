@@ -1,10 +1,4 @@
-import json
-import re
-import subprocess
-import sys
 from pathlib import Path
-
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,7 +35,7 @@ class TestDockerfile:
 
     def test_has_labels(self):
         content = (REPO_ROOT / "Dockerfile").read_text(encoding="utf-8")
-        labels = [l for l in content.split("\n") if l.strip().startswith("LABEL")]
+        labels = [line for line in content.split("\n") if line.strip().startswith("LABEL")]
         assert len(labels) >= 2
 
     def test_copy_src_after_pip(self):
@@ -124,7 +118,7 @@ class TestRuffToml:
         data = tomllib.load((REPO_ROOT / ".ruff.toml").open("rb"))
         assert data["target-version"] == "py314"
 
-    def test_lint_select_contains_E(self):
+    def test_lint_select_contains_e(self):
         import tomllib
         data = tomllib.load((REPO_ROOT / ".ruff.toml").open("rb"))
         select = data.get("lint", {}).get("select", [])

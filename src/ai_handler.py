@@ -6,11 +6,10 @@ import time
 from datetime import datetime
 from typing import Any
 
-from src.logging_setup import ErrorCode, ec
-
 import httpx
 from pydantic import BaseModel
 
+from src.logging_setup import ErrorCode, ec
 from src.models import DraftContent, RawMessage
 
 logger = logging.getLogger(__name__)
@@ -175,7 +174,7 @@ def prompt_for_tags(tags: list[str]) -> dict[str, str]:
     return PROMPT_REGISTRY["default"]
 
 
-class AllModelsExhausted(Exception):
+class AllModelsExhaustedError(Exception):
     pass
 
 
@@ -245,7 +244,7 @@ class OpenRouterClient:
             except json.JSONDecodeError as e:
                 logger.warning("JSON decode error on model %s, trying next", model)
                 last_exception = e
-        raise AllModelsExhausted(
+        raise AllModelsExhaustedError(
             f"All models exhausted for this request. Last error: {last_exception}"
         ) from last_exception
 
@@ -298,7 +297,7 @@ class OpenRouterClient:
             except Exception as e:
                 logger.warning("Unexpected error on model %s: %s, trying next", model, e)
                 last_exception = e
-        raise AllModelsExhausted(
+        raise AllModelsExhaustedError(
             f"All models exhausted for structured request. Last error: {last_exception}"
         ) from last_exception
 
@@ -462,8 +461,10 @@ class AIConsumer:
             if translate_result is None:
                 logger.error("Message %d: all models exhausted for translation, skipping", msg.message_id)
                 return None
-        except AllModelsExhausted:
-            logger.error(ec(ErrorCode.ALL_MODELS_EXHAUSTED, f"Message {msg.message_id} from {msg.source_channel}: all models exhausted for translation"))
+        except AllModelsExhaustedError:
+            logger.error(
+                ec(ErrorCode.ALL_MODELS_EXHAUSTED, "Message %d: all models exhausted for translation"), msg.message_id
+            )
             await self.pause_ai()
             return None
 
@@ -490,8 +491,12 @@ class AIConsumer:
                     tags=tags,
                     used_fallback=used_fallback,
                 )
-        except AllModelsExhausted:
-            logger.warning(ec(ErrorCode.ALL_MODELS_EXHAUSTED, f"Message {msg.message_id} from {msg.source_channel}: all models exhausted for rewrite, using translated text"))
+        except AllModelsExhaustedError:
+            logger.warning(
+                ec(ErrorCode.ALL_MODELS_EXHAUSTED,
+                   "Message %d: all models exhausted for rewrite, using translated text"),
+                msg.message_id,
+            )
             await self.pause_ai()
             return DraftContent(
                 title_vn=translate_result.translated_text[:100],

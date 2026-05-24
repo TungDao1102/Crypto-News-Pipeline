@@ -53,7 +53,6 @@ class PublisherConsumer:
             logger.info("Publisher consumer cancelled")
 
     def register_health(self, health_collector) -> None:
-        from src.health import HealthCollector
         self._health_collector = health_collector
         health_collector.register("publisher", self._check_health, timeout=5.0)
 
@@ -87,7 +86,9 @@ class PublisherConsumer:
                 await self._publish_to_platforms(draft)
                 self._published_ids.add(draft.title_vn)
             except Exception:
-                logger.exception(ec(ErrorCode.PUBLISH_FAIL, "Publisher: unexpected error processing draft %s", draft.title_vn))
+                logger.exception(
+                    ec(ErrorCode.PUBLISH_FAIL, "Publisher: unexpected error processing draft %s", draft.title_vn)
+                )
                 if self._dlq:
                     await self._dlq.put(draft)
                     logger.warning("Draft '%s' moved to DLQ", draft.title_vn)
