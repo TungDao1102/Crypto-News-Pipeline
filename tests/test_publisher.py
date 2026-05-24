@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -491,8 +492,8 @@ class TestPublisherConsumerHealth:
             telegram_channel_id="@ch",
         )
         consumer._published_ids.add("already-published")
-        consumer._shutdown = AsyncMock()
-        consumer._shutdown.is_set.return_value = True
+        consumer._shutdown = asyncio.Event()
+        consumer._shutdown.set()
         consumer._publish_queue.get = AsyncMock(return_value=MagicMock(title_vn="already-published"))
 
         with patch.object(consumer, "_publish_to_platforms", AsyncMock()) as mock_pub:

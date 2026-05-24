@@ -160,8 +160,8 @@ class TelegramCrawler:
             content_hash=content_hash,
         )
         await self.queue.put(msg)
-        from datetime import datetime
-        self._last_message_time = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        self._last_message_time = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         logger.debug("Queued message from %s: %.60s...", channel, text)
 
     @staticmethod
