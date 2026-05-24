@@ -56,7 +56,7 @@ class HealthCollector:
             return True
         return False
 
-    def send_alert(self, event_type: str, message: str) -> None:
+    async def send_alert(self, event_type: str, message: str) -> None:
         if self._bot is None:
             logger.warning("Bot not set, cannot send alert for '%s'", event_type)
             return
@@ -64,7 +64,7 @@ class HealthCollector:
             logger.debug("Alert '%s' suppressed by cooldown", event_type)
             return
         try:
-            self._bot.send_message(chat_id=self._admin_chat_id, text=f"\u26a0\ufe0f {message}")
+            await self._bot.send_message(chat_id=self._admin_chat_id, text=f"\u26a0\ufe0f {message}")
         except Exception:
             logger.exception("Failed to send alert for '%s'", event_type)
 

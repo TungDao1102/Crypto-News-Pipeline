@@ -1,5 +1,6 @@
 import asyncio
 import time
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -83,3 +84,48 @@ def test_startup_alert_storm_prevention():
     }
     collector = HealthCollector()
     assert expected.issubset(collector._alert_cooldowns.keys())
+
+
+@pytest.mark.asyncio
+async def test_send_alert_with_bot_sends_message():
+    collector = HealthCollector()
+    bot = AsyncMock()
+    collector.set_bot(bot, admin_chat_id="@admin")
+    await collector.send_alert("test_event", "Something happened")
+    bot.send_message.assert_called_once()
+    assert bot.send_message.call_args.kwargs["chat_id"] == "@admin"
+    assert "⚠️" in bot.send_message.call_args.kwargs["text"]
+
+
+@pytest.mark.asyncio
+async def test_send_alert_without_bot_does_not_crash():
+    collector = HealthCollector()
+    await collector.send_alert("test_event", "Something happened")
+
+
+@pytest.mark.asyncio
+async def test_send_alert_respects_cooldown():
+    collector = HealthCollector(alert_cooldown=10)
+    bot = AsyncMock()
+    collector.set_bot(bot, admin_chat_id="@admin")
+    await collector.send_alert("cooldown_test", "First alert")
+    assert bot.send_message.call_count == 1
+    await collector.send_alert("cooldown_test", "Second alert")
+    assert bot.send_message.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_get_report_overall_degraded():
+    collector = HealthCollector()
+
+    async def ok_check() -> dict:
+        return {"status": "ok"}
+
+    async def fail_check() -> dict:
+        raise RuntimeError("broken")
+
+    collector.register("ok", ok_check)
+    collector.register("fail", fail_check)
+
+    report = await collector.get_report()
+    assert report["status"] == "degraded"
