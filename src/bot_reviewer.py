@@ -3,6 +3,7 @@ import logging
 
 import httpx
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import InvalidToken
 from telegram.ext import (
     Application,
     CallbackContext,
@@ -375,7 +376,12 @@ async def run_bot(
 
     register_handlers(application)
 
-    await application.initialize()
+    try:
+        await application.initialize()
+    except InvalidToken as e:
+        logger.critical("Bot token rejected by Telegram server: %s", e)
+        logger.critical("Generate a new token via @BotFather and update .env")
+        return
     await application.start()
     await application.updater.start_polling()
 

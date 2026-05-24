@@ -16,6 +16,14 @@ HASHTAG_MAP: dict[str, str] = {
     "gamefi": "#GameFi",
     "layer2": "#Layer2",
     "staking": "#Staking",
+    "macro": "#Macro",
+    "news": "#CryptoNews",
+    "trading": "#Trading",
+    "meme": "#MemeCoin",
+    "rwa": "#RWA",
+    "infra": "#Infrastructure",
+    "security": "#Security",
+    "regulation": "#Regulation",
 }
 
 TAG_LINE_PATTERN = re.compile(r"^[\s#\$A-Za-z0-9_]+$")

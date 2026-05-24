@@ -376,6 +376,31 @@ class TestAIConsumer:
         assert consumer._pause.is_set()
 
     @pytest.mark.asyncio
+    async def test_health_check_registration(self):
+        consumer = self.make_consumer()
+        health_collector = MagicMock()
+
+        consumer.register_health(health_collector)
+
+        health_collector.register.assert_called_once()
+        args = health_collector.register.call_args[0]
+        assert args[0] == "ai_consumer"
+
+    @pytest.mark.asyncio
+    async def test_health_check_returns_metrics(self):
+        consumer = self.make_consumer()
+        consumer._last_processed_time = "2026-05-24T11:03:38Z"
+
+        report = await consumer._check_health()
+
+        assert report["worker_count"] == 2
+        assert report["active_workers"] == 0
+        assert report["raw_queue_depth"] == 0
+        assert report["result_queue_depth"] == 0
+        assert report["paused"] is False
+        assert report["last_processed_at"] == "2026-05-24T11:03:38Z"
+
+    @pytest.mark.asyncio
     async def test_process_message_full_success(self):
         consumer = self.make_consumer()
         msg = MagicMock(source_channel="@channel", raw_text="Bitcoin hits $100k")

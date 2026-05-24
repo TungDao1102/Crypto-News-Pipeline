@@ -199,3 +199,26 @@ logs/
 .session/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
+.venv/
+
+.session/
+
+.venv/
+
+.session/
+
+.venv/
+
+.session/
+
+.venv/
+
+.session/
+
+.venv/
+
+.session/
+
+.venv/
+
+.session/

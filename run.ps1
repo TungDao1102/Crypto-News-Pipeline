@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Crypto News Pipeline — Windows Development Script
+    Crypto News Pipeline - Windows Development Script
     Runs the crypto-news-pipeline natively on Windows without Docker.
 .DESCRIPTION
     Automates Python environment setup, dependency installation, and pipeline
@@ -30,7 +30,7 @@ $ErrorActionPreference = 'Stop'
 # D-01: Derive project root from script location
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $VenvPath = Join-Path $ProjectRoot ".venv"
-$PythonExe = Join-Path $VenvPath "Scripts" "python.exe"
+$PythonExe = Join-Path (Join-Path $VenvPath "Scripts") "python.exe"
 $Requirements = Join-Path $ProjectRoot "requirements.txt"
 $GitIgnore = Join-Path $ProjectRoot ".gitignore"
 $SessionDir = Join-Path $ProjectRoot ".session"
@@ -39,7 +39,7 @@ Set-Location -LiteralPath $ProjectRoot
 
 # D-14: --help flag
 if ($Help) {
-    Write-Output "Crypto News Pipeline — Windows Development Script"
+    Write-Output "Crypto News Pipeline - Windows Development Script"
     Write-Output ""
     Write-Output "Usage: .\run.ps1 [--help] [--setup]"
     Write-Output ""
@@ -57,7 +57,7 @@ if ($Help) {
     exit 0
 }
 
-Write-Output "=== Crypto News Pipeline — Windows Setup ==="
+Write-Output "=== Crypto News Pipeline - Windows Setup ==="
 Write-Output "[Validate] Checking prerequisites..."
 
 # D-02: Check Python is installed
@@ -73,8 +73,8 @@ if ($PythonVersion -notmatch "3\.14") {
     exit 1
 }
 
-# D-09: Validation delegated to config.py — no grep checks for .env or sources.json
-# D-10: Directories created by Python at runtime — no mkdir/New-Item for logs/ or .session/
+# D-09: Validation delegated to config.py - no grep checks for .env or sources.json
+# D-10: Directories created by Python at runtime - no mkdir/New-Item for logs/ or .session/
 
 Write-Output "[Init] Setting up environment..."
 
@@ -96,7 +96,7 @@ if (-not $?) {
     exit 1
 }
 
-# D-08: Ensure .venv/ in .gitignore (defensive check — already present at line 128)
+# D-08: Ensure .venv/ in .gitignore (defensive check - already present at line 128)
 if (Test-Path -LiteralPath $GitIgnore) {
     $GitContent = Get-Content -LiteralPath $GitIgnore -Raw
     if ($GitContent -notmatch '(?m)^\.venv/?$') {
@@ -120,6 +120,6 @@ if ($Setup) {
     exit 0
 }
 
-# D-13, D-03, D-11: Run phase — invoke pipeline
+# D-13, D-03, D-11: Run phase - invoke pipeline
 Write-Output "[Run] Starting pipeline..."
 & $PythonExe -m src.main

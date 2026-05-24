@@ -380,6 +380,20 @@ class AIConsumer:
         self._preprocessor = TextPreprocessor()
         self._openrouter = OpenRouterClient(api_key, http_client)
 
+    def register_health(self, health_collector) -> None:
+        health_collector.register("ai_consumer", self._check_health, timeout=5.0)
+
+    async def _check_health(self) -> dict[str, Any]:
+        return {
+            "worker_count": self.worker_count,
+            "active_workers": sum(1 for worker in self._workers if not worker.done()),
+            "raw_queue_depth": self.raw_queue.qsize(),
+            "result_queue_depth": self.result_queue.qsize(),
+            "paused": self._pause.is_set(),
+            "pause_until": self._pause_until,
+            "last_processed_at": self._last_processed_time,
+        }
+
     async def pause_ai(self, duration: int = 300) -> None:
         """Pause all AI workers for `duration` seconds."""
         self._pause.set()
