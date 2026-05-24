@@ -8,6 +8,7 @@ class PublisherResult:
     success: bool
     url: str | None = None
     error: str | None = None
+    post_id: str | None = None
 
 
 class BasePublisher(abc.ABC):
